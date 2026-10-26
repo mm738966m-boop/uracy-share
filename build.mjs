@@ -53,6 +53,7 @@ async function open_(pw){try{
   const d=b64(DATA);const buf=await crypto.subtle.decrypt({name:'AES-GCM',iv:d.slice(0,12)},key,d.slice(12));
   const page=document.getElementById('page');page.innerHTML=new TextDecoder().decode(buf);
   document.getElementById('gate').remove();page.hidden=false;
+  for(const old of page.querySelectorAll('script')){const sc=document.createElement('script');sc.textContent=old.textContent;old.replaceWith(sc)}
   try{sessionStorage.setItem('k',pw)}catch(e){}
 }catch(e){document.getElementById('msg').innerHTML='ひらけませんでした。<br>LINEでお送りしたリンクを、そのままタップしてください。'}}
 (function(){const m=location.hash.match(/[#&]k=([A-Za-z0-9]+)/);
