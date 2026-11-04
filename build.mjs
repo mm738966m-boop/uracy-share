@@ -3,8 +3,14 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 const PW = readFileSync(new URL('.key', import.meta.url), 'utf8').trim();
-const SRC = '/Users/morikawa/Desktop/Uracy法人化_パパ丸山/kickoff.html';
+// 別ページは環境変数で: SRC=… OUT=radio/index.html TITLE=… DESC=… P=../ node build.mjs
+const SRC = process.env.SRC || '/Users/morikawa/Desktop/Uracy法人化_パパ丸山/kickoff.html';
+const OUT = process.env.OUT || 'index.html';
+const TITLE = process.env.TITLE || 'Uracyを会社にするなら';
+const DESC = process.env.DESC || 'パパ丸山さんとのZoomの前に読んでおいてほしい資料です（森川より）';
+const P = process.env.P || '';
 const URL_ = 'https://mm738966m-boop.github.io/uracy-share/';
+const PAGE_URL = URL_ + (OUT === 'index.html' ? '' : OUT.replace(/index\.html$/, ''));
 const b64 = u8 => Buffer.from(u8).toString('base64');
 const salt = crypto.getRandomValues(new Uint8Array(16));
 const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(PW), 'PBKDF2', false, ['deriveKey']);
@@ -19,11 +25,11 @@ const data = new Uint8Array(12 + ct.length); data.set(iv); data.set(ct, 12);
 const shell = `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>Uracyを会社にするなら</title>
-<meta name="description" content="パパ丸山さんとのZoomの前に読んでおいてほしい資料です（森川より）">
-<meta property="og:title" content="Uracyを会社にするなら">
-<meta property="og:description" content="パパ丸山さんとのZoomの前に読んでおいてほしい資料です（森川より）">
-<meta property="og:url" content="${URL_}">
+<title>${TITLE}</title>
+<meta name="description" content="${DESC}">
+<meta property="og:title" content="${TITLE}">
+<meta property="og:description" content="${DESC}">
+<meta property="og:url" content="${PAGE_URL}">
 <meta property="og:image" content="${URL_}img/mascot_invite.webp">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,8 +45,8 @@ html,body{margin:0}
 </head>
 <body>
 <div id="gate"><div class="in">
-  <img src="img/mascot_invite.webp" alt="" width="120" height="120">
-  <h1>Uracyを会社にするなら</h1>
+  <img src="${P}img/mascot_invite.webp" alt="" width="120" height="120">
+  <h1>${TITLE}</h1>
   <p id="msg">ひらいています…</p>
 </div></div>
 <div id="page" hidden></div>
@@ -64,5 +70,5 @@ async function open_(pw){try{
 </body>
 </html>
 `;
-writeFileSync(new URL('index.html', import.meta.url), shell);
-console.log('wrote index.html', shell.length);
+writeFileSync(new URL(OUT, import.meta.url), shell);
+console.log('wrote', OUT, shell.length);
